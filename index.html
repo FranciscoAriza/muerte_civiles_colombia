@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -53,7 +53,12 @@
           </div>
 
           <div class="inner cover">
-            <h1 class="cover-heading">Muerte de Civiles por Acciones Bélicas en Colombia.</h1>
+            <h1 class="cover-heading">Muerte de Civiles por Acciones Bélicas en Colombia</h1>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <svg width="640" height="500"></svg>
+              </div>
+            </div>
             <p class="lead"></p>
             <p class="lead">
               <a href="https://github.com/FranciscoAriza/muerte_civiles_colombia" class="btn btn-lg btn-default" target="_blank">Github</a>
@@ -62,7 +67,7 @@
 
           <div class="mastfoot">
             <div class="inner">
-              <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
+              <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a></p>
             </div>
           </div>
 
@@ -82,3 +87,100 @@
     <script src="static/js/ie10-viewport-bug-workaround.js"></script>
   </body>
 </html>
+<style>
+
+.axis .domain {
+  display: none;
+}
+
+</style>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 30, left: 90},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var y = d3.scaleBand()
+    .rangeRound([0, height])
+    .paddingInner(0.05)
+    .align(0.1);
+
+var x = d3.scaleLinear()
+    .rangeRound([0, width]);
+
+var z = d3.scaleOrdinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+d3.csv("static/data/data.csv", function(d, i, columns) {
+  for (i = 1, t = 0; i < columns.length; ++i) t += d[columns[i]] = +d[columns[i]];
+  d.total = t;
+  return d;
+}, function(error, data) {
+  if (error) throw error;
+
+  var keys = data.columns.slice(1);
+
+  data.sort(function(a, b) { return b.total - a.total; });
+  y.domain(data.map(function(d) { return d.Departamento; }));
+  x.domain([0, d3.max(data, function(d) { return d.total; })]).nice();
+  z.domain(keys);
+
+  g.append("g")
+    .selectAll("g")
+    .data(d3.stack().keys(keys)(data))
+    .enter().append("g")
+      .attr("fill", function(d) { return z(d.key); })
+    .selectAll("rect")
+    .data(function(d) { return d; })
+    .enter().append("rect")
+      .attr("y", function(d) { return y(d.data.Departamento); })
+      .attr("x", function(d) { return x(d[0]); })
+      .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+      .attr("height", y.bandwidth());
+
+  g.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0,0)")
+      .call(d3.axisLeft(y));
+
+  g.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x).ticks(null, "s"))
+    .append("text")
+      .attr("y", 2)
+      .attr("x", x(x.ticks().pop()) + 0.5)
+      .attr("dy", "0.32em")
+      .attr("fill", "#000")
+      .attr("font-weight", "bold")
+      .attr("text-anchor", "start")
+      .text("#Victimas")
+      .attr("transform", "translate("+ (-width) +",-10)");
+
+  var legend = g.append("g")
+      .attr("font-family", "sans-serif")
+      .attr("font-size", 10)
+      .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(keys.slice().reverse())
+    .enter().append("g")
+     // .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+     .attr("transform", function(d, i) { return "translate(-50," + (300 + i * 20) + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 19)
+      .attr("width", 19)
+      .attr("height", 19)
+      .attr("fill", z);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9.5)
+      .attr("dy", "0.32em")
+      .text(function(d) { return d; });
+});
+
+</script>

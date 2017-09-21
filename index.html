@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,52 +29,55 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
   </head>
 
   <body>
 
-    <div class="site-wrapper">
-
+    <div class="site-wrapper">             
       <div class="site-wrapper-inner">
-
-        <div class="cover-container">
-
-          <div class="masthead clearfix">
-            <div class="inner">
-              <h3 class="masthead-brand">@FranciscoAriza</h3>
-              <nav>
-                <ul class="nav masthead-nav">
-                  <li class="active"><a href="#"></a></li>
-                  <li><a href="#"></a></li>
-                  <li><a href="#"></a></li>
-                </ul>
-              </nav>
-            </div>
-          </div>
-
           <div class="inner cover">
-            <h1 class="cover-heading">Muerte de Civiles por Acciones Bélicas en Colombia</h1>
+            <div class="cover-container">
+            <div class="inner">
+              <h1 style="margin-bottom: 60px">¿Quién pone los muertos en Colombia?</h1>          
+              <p>
+                Acaso te has preguntado ¿quiénes son los más perjudicados por la guerra en Colombia?, ¿cuáles de los actores armados pone más muertos en el conflicto? y principalmente
+                ¿la población civil está protegida?
+              </p>
+              <p>
+                Para dar respuesta a estos interrogantes y quizás a otras preguntas que aún desconocemos, presentamos un análisis de los <a href="https://www.datos.gov.co/DataJam/Data-Jam-2017-OP-Centro-Memoria-Civiles-Muertos-Ac/6p84-qhsn/data" target="_blank">datos</a> publicados por el centro de memoria histórica para el periodo comprendido entre 1988 y 2012, los cuales tienen algunos filtros y excepciones de información que pueden ser consultados <a href="https://www.datos.gov.co/DataJam/Data-Jam-2017-OP-Centro-Memoria-Civiles-Muertos-Ac/6p84-qhsn" target="_blank">aquí</a>.
+              </p>
+            </div>
+         
             <div class="panel panel-default">
               <div class="panel-body">
                 <svg width="640" height="500"></svg>
               </div>
+            </div>
+            <div class="alert alert-info">
+              <strong>Qué observar?</strong> La mayor cantidad de muertos en acciones bélicas son civiles. Antioquia es el departamento con mayor número de víctimas, diferente a lo que se puede pensar
+              por la alta presencia de guerrilla en otros departamentos de Colombia.
+            </div>
+            <p>
+                Pero...¿qué es una acción bélica?, para dar respuesta a través de los datos se encuentra la clasificación por tipo de hecho, por ejemplo: Bombardeo, Combate, Incursión, etc.
+                Te has preguntado qué hechos son los que más han cobrado víctimas? Exploralo en la siguiente visualización.
+              </p>
+             <div class="panel panel-default">
+              <div class="panel-body">
+                <div id="scatter"></div>
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <strong>Qué observar?</strong> Los combates son las acciones bélicas que más han cobrado víctimas tanto de la población civil como combatientes, seguido de las incursiones y las emboscadas.
+              El número de víctimas civiles versus las victimas de los combatientes tienen correlación sin importar el tipo de hecho.
             </div>
             <p class="lead"></p>
             <p class="lead">
               <a href="https://github.com/FranciscoAriza/muerte_civiles_colombia" class="btn btn-lg btn-default" target="_blank">Github</a>
             </p>
           </div>
-
-          <div class="mastfoot">
-            <div class="inner">
-              <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a></p>
-            </div>
-          </div>
-
         </div>
-
       </div>
-
     </div>
 
     <!-- Bootstrap core JavaScript
@@ -85,6 +88,7 @@
     <script src="static/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="static/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="static/js/scatter.js"></script>
   </body>
 </html>
 <style>
@@ -94,7 +98,6 @@
 }
 
 </style>
-<script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
 
 var svg = d3.select("svg"),
@@ -139,7 +142,16 @@ d3.csv("static/data/data.csv", function(d, i, columns) {
       .attr("y", function(d) { return y(d.data.Departamento); })
       .attr("x", function(d) { return x(d[0]); })
       .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-      .attr("height", y.bandwidth());
+      .attr("height", y.bandwidth())
+      .on("mouseover", function() { tooltip.style("display", null); })
+    .on("mouseout", function() { tooltip.style("display", "none"); })
+    .on("mousemove", function(d) {
+      console.log(d);
+      var xPosition = d3.mouse(this)[0] - 5;
+      var yPosition = d3.mouse(this)[1] - 5;
+      tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+      tooltip.select("text").text(d[1]-d[0]);
+    });
 
   g.append("g")
       .attr("class", "axis")
@@ -182,5 +194,23 @@ d3.csv("static/data/data.csv", function(d, i, columns) {
       .attr("dy", "0.32em")
       .text(function(d) { return d; });
 });
+// Prep the tooltip bits, initial display is hidden
+  var tooltip = svg.append("g")
+    .attr("data-toggle", "tooltip")
+    .style("display", "none");
+      
+  tooltip.append("rect")
+    .attr("width", 60)
+    .attr("height", 20)
+    .attr("fill", "black")
+    .style("opacity", 0.5);
+
+  tooltip.append("text")
+    .attr("x", 30)
+    .attr("dy", "1.2em")
+    .style("text-anchor", "middle")
+    .attr("fill", "white")
+    .attr("font-size", "12px")
+    .attr("font-weight", "bold");
 
 </script>

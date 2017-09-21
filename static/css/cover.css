@@ -6,9 +6,19 @@
 a,
 a:focus,
 a:hover {
-  color: #fff;
+  color: #55c6c2;
 }
 
+h1 {
+  color: #34b2ae;
+}
+a {
+  text-decoration: underline;
+  color: #55c6c2;
+}
+p {
+  text-align: justify;
+}
 /* Custom default button */
 .btn-default,
 .btn-default:hover,
@@ -160,4 +170,33 @@ body {
   .cover-container {
     width: 700px;
   }
+}
+
+.toolTip {
+    pointer-events: none;
+    position: absolute;
+    min-width: 50px;
+    height: auto;
+    background: none repeat scroll 0 0 rgb(229, 229, 229);    
+    padding: 9px 14px 6px 14px;
+    border-radius: 15px;
+    text-align: left;  
+    box-shadow: 0px 12px 5px rgba(0, 0, 0, 0.2);
+    background-color: rgba(85,85,85,0.9);
+    
+
+}
+.elemento:hover {
+    fill: rgb(245, 39, 39);    
+}
+
+.axis{
+    font-size: 12px;
+    font-family:sans-serif;
+}
+
+.axis_label{
+    fill:#555;
+    font-size:18px;    
+    font-family:sans-serif;
 }
